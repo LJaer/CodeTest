@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ljaer.dao.CodeTestDao">
+
+	<parameterMap type="java.util.Map" id="newCodeParams">
+		<parameter property="pre" jdbcType="VARCHAR" mode="IN" />
+		<parameter property="preLen" jdbcType="INTEGER" mode="IN" />
+		<parameter property="num" jdbcType="INTEGER" mode="IN" />
+		<parameter property="noLen" jdbcType="INTEGER" mode="IN" />
+		<parameter property="newCode" jdbcType="VARCHAR" mode="OUT" />
+	</parameterMap>
+
+	<insert id="getCode" parameterMap="newCodeParams" statementType="CALLABLE">
+		call code_test(?,?,?,?,?)
+	</insert>
+
+	<select id="getOldCode" resultType="java.lang.String"
+		parameterType="java.util.HashMap">
+		SELECT `code`
+		FROM
+		code_test
+		WHERE
+		SUBSTRING(`code`,1,#{preLen}) = #{pre}
+		AND SUBSTRING(`code`,(#{preLen}+
+		1),#{num}) = #{currentDate}
+		AND LENGTH(`code`) = #{preLen} + #{num} +
+		#{noLen}
+		ORDER BY id DESC
+		LIMIT 1;
+	</select>
+
+	<insert id="saveSelective" parameterType="com.ljaer.po.CodeTest">
+		insert into code_test
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="code != null">
+				code,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="code != null">
+				#{code,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+
+</mapper>
